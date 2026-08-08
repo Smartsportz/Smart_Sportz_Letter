@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: smartsportz-letter-builder
+    env: python
+    buildCommand: pip install -r flask_app/requirements.txt
+    startCommand: python flask_app/app.py
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.6

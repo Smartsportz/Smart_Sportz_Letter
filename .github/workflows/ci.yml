@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  flask:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r flask_app/requirements.txt pymupdf
+
+      - name: Check Python syntax
+        run: python -m py_compile flask_app/app.py
+
+      - name: Verify Flask PDF endpoint
+        run: |
+          python - <<'PY'
+          import json
+          import pymupdf
+          from flask_app.app import app
+
+          payload = {
+              "method": "method2",
+              "title": "OFFICIAL ANNOUNCEMENT",
+              "dear": "Valued Sports Partner",
+              "body": "This is a deployment verification letter.",
+              "offset": 0,
+              "pageCount": 1,
+          }
+
+          with app.test_client() as client:
+              health = client.get("/health")
+              assert health.status_code == 200
+              response = client.post(
+                  "/download-pdf",
+                  data=json.dumps(payload),
+                  content_type="application/json",
+              )
+              assert response.status_code == 200
+              doc = pymupdf.open(stream=response.data, filetype="pdf")
+              assert doc.page_count == 1
+          PY

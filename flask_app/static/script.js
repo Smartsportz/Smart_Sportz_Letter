@@ -70,62 +70,54 @@ document.querySelectorAll('input, textarea').forEach(field => {
   field.addEventListener('input', updatePreview);
 });
 
-function waitForPageImages(page) {
-  const images = Array.from(page.querySelectorAll('img'));
-  return Promise.all(images.map(img => {
-    if (img.complete && img.naturalWidth > 0) {
-      return Promise.resolve();
-    }
-    return new Promise(resolve => {
-      img.addEventListener('load', resolve, { once: true });
-      img.addEventListener('error', resolve, { once: true });
-    });
-  }));
-}
-
 async function downloadPdf() {
   const title = state.method === 'method1'
     ? document.getElementById('m1-title').value.trim()
     : document.getElementById('m2-title').value.trim();
   const filename = `${(title || 'letter').toLowerCase().replace(/[^a-z0-9]+/g, '_')}.pdf`;
-  const pages = Array.from(els.stack.querySelectorAll('.letter'));
+  const payload = state.method === 'method1'
+    ? {
+        method: 'method1',
+        title,
+        from: document.getElementById('m1-from').value,
+        to: document.getElementById('m1-to').value,
+        subject: document.getElementById('m1-subject').value,
+        body: document.getElementById('m1-body').value
+      }
+    : {
+        method: 'method2',
+        title,
+        dear: document.getElementById('m2-dear').value,
+        body: document.getElementById('m2-body').value
+      };
+
+  payload.offset = state.offset;
+  payload.pageCount = els.stack.querySelectorAll('.letter').length;
 
   els.pdfBtn.disabled = true;
   els.pdfBtn.textContent = 'Preparing PDF...';
-  document.body.classList.add('exporting');
 
   try {
-    await document.fonts.ready;
-    const PdfClass = window.jspdf?.jsPDF || window.jsPDF;
-    const pdf = new PdfClass('p', 'mm', 'a4');
+    const response = await fetch('/download-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
-    for (let index = 0; index < pages.length; index += 1) {
-      const page = pages[index];
-      await waitForPageImages(page);
-
-      const canvas = await html2canvas(page, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        scrollX: 0,
-        scrollY: 0,
-        width: page.offsetWidth,
-        height: page.offsetHeight,
-        windowWidth: page.offsetWidth,
-        windowHeight: page.offsetHeight
-      });
-
-      const image = canvas.toDataURL('image/png');
-      if (index > 0) {
-        pdf.addPage('a4', 'portrait');
-      }
-      pdf.addImage(image, 'PNG', 0, 0, 210, 297);
+    if (!response.ok) {
+      throw new Error('PDF download failed');
     }
 
-    pdf.save(filename);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   } finally {
-    document.body.classList.remove('exporting');
     els.pdfBtn.disabled = false;
     els.pdfBtn.textContent = 'Download PDF';
   }
