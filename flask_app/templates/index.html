@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartSportz Letter Builder</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <main class="layout">
+    <section class="panel controls">
+      <div class="brand">
+        <h1>Letter Builder</h1>
+        <p>SmartSportz format generator</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" data-method="method1">Method 1</button>
+        <button class="tab" data-method="method2">Method 2</button>
+      </div>
+
+      <form id="letter-form">
+        <div class="position-control">
+          <label>Letter Position</label>
+          <div class="position-buttons">
+            <button type="button" id="move-up" class="mini-btn">Up</button>
+            <button type="button" id="move-down" class="mini-btn">Down</button>
+          </div>
+        </div>
+
+        <div class="position-control">
+          <div class="position-buttons">
+            <button type="button" id="add-page" class="mini-btn">Add Page</button>
+            <button type="button" id="remove-page" class="mini-btn">Remove Page</button>
+          </div>
+        </div>
+
+        <div class="method method1">
+          <label>Title
+            <input type="text" id="m1-title" value="APPOINTMENT LETTER">
+          </label>
+          <label>From
+            <textarea id="m1-from" rows="3">The Management,
+SMARTSPORTZ.IN,
+Bangalore, India</textarea>
+          </label>
+          <label>To
+            <textarea id="m1-to" rows="3">To,
+Mr. Rajesh Kumar,
+Senior Sports Coordinator,
+Bangalore</textarea>
+          </label>
+          <label>Subject
+            <input type="text" id="m1-subject" value="SUB: Appointment as Senior Sports Coordinator">
+          </label>
+          <label>Body
+            <textarea id="m1-body" rows="10">We are pleased to offer you the position of Senior Sports Coordinator at SMARTSPORTZ.IN. Based on your experience and skills in managing athletic tournaments, we believe you will be a valuable asset to our organization.
+
+Your roles and responsibilities will involve coordinating inter-school sports competitions, overseeing venue logistics, and promoting our youth fitness programs across regional centers.
+
+Please sign and return the duplicate copy of this letter as a token of your acceptance of the terms and conditions outlined herein. We look forward to welcoming you to the SMARTSPORTZ.IN team.</textarea>
+          </label>
+        </div>
+
+        <div class="method method2 hidden">
+          <label>Title
+            <input type="text" id="m2-title" value="OFFICIAL ANNOUNCEMENT">
+          </label>
+          <label>Dear
+            <input type="text" id="m2-dear" value="Valued Sports Partner">
+          </label>
+          <label>Body
+            <textarea id="m2-body" rows="12">We are thrilled to announce the launch of our upcoming National Junior Championship 2026 sponsored by SMARTSPORTZ.IN.
+
+Over the past year, our platform has empowered thousands of young athletes to play, compete, inspire, and succeed across multiple sports disciplines. This tournament brings together top talent from over 50 schools across the region.
+
+We cordially invite your organization to participate as an official partner for this flagship event. Detailed event schedules and sponsorship kits are attached with this notice.</textarea>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button type="button" id="pdf-btn" class="primary">Download PDF</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel preview-wrap">
+      <div id="preview-stack" class="preview-stack">
+        <div id="preview" class="letter">
+          <img class="letterhead" src="{{ url_for('static', filename='letterhead.jpg') }}" alt="SmartSportz letterhead">
+
+          <div id="letter-content" class="letter-content">
+            <div class="letter-body">
+              <div id="preview-method1" class="preview-method">
+                <h2 id="p-m1-title"></h2>
+                <div class="meta-row"><span id="p-m1-from"></span></div>
+                <div class="meta-row"><span id="p-m1-to"></span></div>
+                <div class="meta-row subject"><span id="p-m1-subject"></span></div>
+                <div id="p-m1-body" class="body-text"></div>
+              </div>
+
+              <div id="preview-method2" class="preview-method hidden">
+                <h2 id="p-m2-title"></h2>
+                <p id="p-m2-dear" class="dear"></p>
+                <div id="p-m2-body" class="body-text"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

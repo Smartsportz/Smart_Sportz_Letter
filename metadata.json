@@ -1,0 +1,6 @@
+{
+  "name": "SmartLetter Generator",
+  "description": "Professional company letterhead generator supporting Method 1 (From-To-Sub-Body) and Method 2 (Dear-Body) with live A4 preview, AI assistance, and instant PDF export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
