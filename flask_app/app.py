@@ -1,5 +1,6 @@
 from io import BytesIO
 from pathlib import Path
+import re
 from textwrap import wrap
 
 from flask import Flask, jsonify, render_template, request, send_file
@@ -18,72 +19,123 @@ def px_to_pt(value):
     return float(value) * 0.75
 
 
+LEFT_MARGIN = px_to_pt(70)
+RIGHT_MARGIN = px_to_pt(70)
+CONTENT_WIDTH = PAGE_WIDTH - LEFT_MARGIN - RIGHT_MARGIN
+FIRST_PAGE_START_Y = PAGE_HEIGHT - px_to_pt(224)
+CONTINUATION_START_Y = PAGE_HEIGHT - px_to_pt(250)
+FOOTER_SAFE_Y = px_to_pt(165)
+FONT_SIZE = 10.5
+LINE_GAP = 12.2
+
+
 def safe_text(value):
     return str(value or "").replace("\r\n", "\n").replace("\r", "\n").strip()
 
 
-def draw_wrapped_line(pdf, text, x, y, width, font_name, font_size, line_gap):
-    chars_per_line = max(28, int(width / (font_size * 0.52)))
-    lines = []
-    for raw_line in safe_text(text).split("\n"):
-        if raw_line.strip():
-            lines.extend(wrap(raw_line.strip(), width=chars_per_line))
-        else:
-            lines.append("")
-
-    pdf.setFont(font_name, font_size)
-    for line in lines:
-        pdf.drawString(x, y, line)
-        y -= line_gap
-    return y
+def safe_filename(value):
+    cleaned = re.sub(r"[^a-z0-9]+", "_", safe_text(value).lower()).strip("_")
+    return cleaned or "letter"
 
 
-def draw_body(pdf, text, x, y, width, font_size, line_gap):
-    pdf.setFont("Helvetica", font_size)
-    paragraphs = safe_text(text).split("\n\n")
-    chars_per_line = max(35, int(width / (font_size * 0.49)))
+class LetterPaginator:
+    def __init__(self, pdf, offset=0):
+        self.pdf = pdf
+        self.offset = px_to_pt(offset)
+        self.y = FIRST_PAGE_START_Y - self.offset
+        self.page_count = 0
+        self._start_page(self.y)
 
-    for paragraph_index, paragraph in enumerate(paragraphs):
-        if not paragraph.strip():
-            continue
-        for line in wrap(" ".join(paragraph.split()), width=chars_per_line):
-            pdf.drawString(x, y, line)
-            y -= line_gap
-        if paragraph_index < len(paragraphs) - 1:
-            y -= line_gap * 0.9
-    return y
+    def _draw_background(self):
+        self.pdf.drawImage(str(LETTERHEAD_PATH), 0, 0, width=PAGE_WIDTH, height=PAGE_HEIGHT)
+
+    def _start_page(self, start_y):
+        if self.page_count:
+            self.pdf.showPage()
+        self._draw_background()
+        self.y = start_y
+        self.page_count += 1
+
+    def _new_content_page(self):
+        self._start_page(CONTINUATION_START_Y - self.offset)
+
+    def _ensure_space(self, needed_height):
+        if self.y - needed_height < FOOTER_SAFE_Y:
+            self._new_content_page()
+
+    def gap(self, amount):
+        self._ensure_space(amount)
+        self.y -= amount
+
+    def centered_title(self, title):
+        self._ensure_space(px_to_pt(29))
+        self.pdf.setFillColorRGB(0.05, 0.1, 0.22)
+        self.pdf.setFont("Helvetica-Bold", 14.25)
+        self.pdf.drawCentredString(PAGE_WIDTH / 2, self.y, safe_text(title))
+        self.y -= px_to_pt(29)
+
+    def lines(self, text, font_name="Helvetica", font_size=FONT_SIZE, line_gap=LINE_GAP, width_factor=0.52):
+        chars_per_line = max(28, int(CONTENT_WIDTH / (font_size * width_factor)))
+        wrapped_lines = []
+        for raw_line in safe_text(text).split("\n"):
+            if raw_line.strip():
+                wrapped_lines.extend(wrap(raw_line.strip(), width=chars_per_line))
+            else:
+                wrapped_lines.append("")
+
+        self.pdf.setFillColorRGB(0.05, 0.1, 0.22)
+        self.pdf.setFont(font_name, font_size)
+        for line in wrapped_lines:
+            self._ensure_space(line_gap)
+            if line:
+                self.pdf.drawString(LEFT_MARGIN, self.y, line)
+            self.y -= line_gap
+
+    def body(self, text):
+        paragraphs = re.split(r"\n\s*\n", safe_text(text))
+        chars_per_line = max(35, int(CONTENT_WIDTH / (FONT_SIZE * 0.49)))
+
+        self.pdf.setFillColorRGB(0.05, 0.1, 0.22)
+        self.pdf.setFont("Helvetica", FONT_SIZE)
+        for paragraph_index, paragraph in enumerate(paragraphs):
+            paragraph = " ".join(paragraph.split())
+            if not paragraph:
+                continue
+            for line in wrap(paragraph, width=chars_per_line):
+                self._ensure_space(LINE_GAP)
+                self.pdf.drawString(LEFT_MARGIN, self.y, line)
+                self.y -= LINE_GAP
+            if paragraph_index < len(paragraphs) - 1:
+                self.gap(LINE_GAP * 0.9)
+
+    def add_blank_page(self):
+        self._start_page(CONTINUATION_START_Y - self.offset)
 
 
-def draw_letter_page(pdf, data):
-    pdf.drawImage(str(LETTERHEAD_PATH), 0, 0, width=PAGE_WIDTH, height=PAGE_HEIGHT)
-
+def draw_letter_pages(pdf, data):
+    paginator = LetterPaginator(pdf, data.get("offset", 0))
     method = data.get("method", "method1")
-    offset = px_to_pt(data.get("offset", 0))
-    x = px_to_pt(70)
-    content_width = PAGE_WIDTH - px_to_pt(140)
-    y = PAGE_HEIGHT - px_to_pt(224) - offset
 
     title = safe_text(data.get("title"))
-    pdf.setFillColorRGB(0.05, 0.1, 0.22)
-    pdf.setFont("Helvetica-Bold", 14.25)
-    pdf.drawCentredString(PAGE_WIDTH / 2, y, title)
-    y -= px_to_pt(29)
+    paginator.centered_title(title)
 
     if method == "method1":
-        y = draw_wrapped_line(pdf, data.get("from"), x, y, content_width, "Helvetica", 10.5, 12.2)
-        y -= px_to_pt(9)
-        y = draw_wrapped_line(pdf, data.get("to"), x, y, content_width, "Helvetica", 10.5, 12.2)
-        y -= px_to_pt(10)
-        y = draw_wrapped_line(pdf, data.get("subject"), x, y, content_width, "Helvetica-Bold", 10.5, 12.2)
-        y -= px_to_pt(14)
-        draw_body(pdf, data.get("body"), x, y, content_width, 10.5, 12.2)
+        paginator.lines(data.get("from"))
+        paginator.gap(px_to_pt(9))
+        paginator.lines(data.get("to"))
+        paginator.gap(px_to_pt(10))
+        paginator.lines(data.get("subject"), font_name="Helvetica-Bold")
+        paginator.gap(px_to_pt(14))
+        paginator.body(data.get("body"))
     else:
         dear = safe_text(data.get("dear"))
         if dear and not dear.lower().startswith("dear "):
             dear = f"Dear {dear},"
-        y = draw_wrapped_line(pdf, dear, x, y, content_width, "Helvetica-Bold", 10.5, 12.2)
-        y -= px_to_pt(14)
-        draw_body(pdf, data.get("body"), x, y, content_width, 10.5, 12.2)
+        paginator.lines(dear, font_name="Helvetica-Bold")
+        paginator.gap(px_to_pt(14))
+        paginator.body(data.get("body"))
+
+    return paginator
 
 
 @app.route("/")
@@ -94,22 +146,19 @@ def index():
 @app.route("/download-pdf", methods=["POST"])
 def download_pdf():
     data = request.get_json(silent=True) or {}
-    page_count = max(1, min(int(data.get("pageCount", 1) or 1), 20))
+    requested_page_count = max(1, min(int(data.get("pageCount", 1) or 1), 20))
 
     buffer = BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=A4)
 
-    draw_letter_page(pdf, data)
-    pdf.showPage()
-
-    for _ in range(page_count - 1):
-        pdf.drawImage(str(LETTERHEAD_PATH), 0, 0, width=PAGE_WIDTH, height=PAGE_HEIGHT)
-        pdf.showPage()
+    paginator = draw_letter_pages(pdf, data)
+    for _ in range(requested_page_count - 1):
+        paginator.add_blank_page()
 
     pdf.save()
     buffer.seek(0)
 
-    filename = safe_text(data.get("title")).lower().replace(" ", "_") or "letter"
+    filename = safe_filename(data.get("title"))
     return send_file(
         buffer,
         mimetype="application/pdf",

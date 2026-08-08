@@ -53,4 +53,15 @@ jobs:
               assert response.status_code == 200
               doc = pymupdf.open(stream=response.data, filetype="pdf")
               assert doc.page_count == 1
+
+              long_payload = dict(payload)
+              long_payload["body"] = "\n\n".join([payload["body"]] * 60)
+              long_response = client.post(
+                  "/download-pdf",
+                  data=json.dumps(long_payload),
+                  content_type="application/json",
+              )
+              assert long_response.status_code == 200
+              long_doc = pymupdf.open(stream=long_response.data, filetype="pdf")
+              assert long_doc.page_count > 1
           PY
