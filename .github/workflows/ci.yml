@@ -37,7 +37,8 @@ jobs:
               "method": "method2",
               "title": "OFFICIAL ANNOUNCEMENT",
               "dear": "Valued Sports Partner",
-              "body": "This is a deployment verification letter.",
+              "bodyHtml": "<div><b>This is a deployment verification letter.</b></div><div style=\"text-align: right;\"><u>Right aligned check.</u></div>",
+              "closing": "Yours faithfully,\nXXX",
               "offset": 0,
               "pageCount": 1,
           }
@@ -55,7 +56,7 @@ jobs:
               assert doc.page_count == 1
 
               long_payload = dict(payload)
-              long_payload["body"] = "\n\n".join([payload["body"]] * 60)
+              long_payload["bodyHtml"] = "".join([payload["bodyHtml"]] * 60)
               long_response = client.post(
                   "/download-pdf",
                   data=json.dumps(long_payload),
