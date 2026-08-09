@@ -41,7 +41,7 @@ label {
   font-size: 13px;
   margin-bottom: 12px;
 }
-input, textarea {
+input, textarea, .rich-editor {
   width: 100%;
   margin-top: 6px;
   border-radius: 8px;
@@ -51,6 +51,36 @@ input, textarea {
   padding: 10px 12px;
   font: inherit;
   resize: vertical;
+}
+.rich-editor {
+  min-height: 190px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+.rich-editor:focus {
+  outline: 2px solid #f59e0b;
+  outline-offset: 1px;
+}
+.format-toolbar {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.format-btn {
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: #111827;
+  color: #f8fafc;
+  padding: 9px 6px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.format-btn.active {
+  background: #f59e0b;
+  color: #111827;
 }
 .actions { margin-top: 18px; }
 .position-control {
@@ -146,10 +176,24 @@ h2 {
   line-height: 1.62;
   white-space: pre-wrap;
 }
+.body-text {
+  white-space: normal;
+}
+.body-text p,
+.body-text div {
+  margin: 0 0 14px;
+}
 .meta-row { margin-bottom: 7px; }
 .subject { font-weight: 700; margin-top: 8px; margin-bottom: 12px; }
 .dear { margin: 0 0 12px; font-weight: 700; }
 .body-text { margin-top: 10px; }
+.closing-text {
+  margin-top: 22px;
+  text-align: right;
+  font-size: 14px;
+  line-height: 1.62;
+  white-space: pre-wrap;
+}
 
 @media print {
   @page { size: A4; margin: 0; }

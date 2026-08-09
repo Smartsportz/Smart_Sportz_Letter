@@ -35,6 +35,15 @@
           </div>
         </div>
 
+        <div class="format-toolbar" aria-label="Body formatting">
+          <button type="button" class="format-btn" data-command="bold"><b>B</b></button>
+          <button type="button" class="format-btn" data-command="italic"><i>I</i></button>
+          <button type="button" class="format-btn" data-command="underline"><u>U</u></button>
+          <button type="button" class="format-btn" data-command="justifyLeft">Left</button>
+          <button type="button" class="format-btn" data-command="justifyCenter">Center</button>
+          <button type="button" class="format-btn" data-command="justifyRight">Right</button>
+        </div>
+
         <div class="method method1">
           <label>Title
             <input type="text" id="m1-title" value="APPOINTMENT LETTER">
@@ -54,11 +63,11 @@ Bangalore</textarea>
             <input type="text" id="m1-subject" value="SUB: Appointment as Senior Sports Coordinator">
           </label>
           <label>Body
-            <textarea id="m1-body" rows="10">We are pleased to offer you the position of Senior Sports Coordinator at SMARTSPORTZ.IN. Based on your experience and skills in managing athletic tournaments, we believe you will be a valuable asset to our organization.
-
-Your roles and responsibilities will involve coordinating inter-school sports competitions, overseeing venue logistics, and promoting our youth fitness programs across regional centers.
-
-Please sign and return the duplicate copy of this letter as a token of your acceptance of the terms and conditions outlined herein. We look forward to welcoming you to the SMARTSPORTZ.IN team.</textarea>
+            <div id="m1-body" class="rich-editor" contenteditable="true">We are pleased to offer you the position of Senior Sports Coordinator at SMARTSPORTZ.IN. Based on your experience and skills in managing athletic tournaments, we believe you will be a valuable asset to our organization.<br><br>Your roles and responsibilities will involve coordinating inter-school sports competitions, overseeing venue logistics, and promoting our youth fitness programs across regional centers.<br><br>Please sign and return the duplicate copy of this letter as a token of your acceptance of the terms and conditions outlined herein. We look forward to welcoming you to the SMARTSPORTZ.IN team.</div>
+          </label>
+          <label>Last Text
+            <textarea id="m1-closing" rows="3">Yours faithfully,
+XXX</textarea>
           </label>
         </div>
 
@@ -70,11 +79,11 @@ Please sign and return the duplicate copy of this letter as a token of your acce
             <input type="text" id="m2-dear" value="Valued Sports Partner">
           </label>
           <label>Body
-            <textarea id="m2-body" rows="12">We are thrilled to announce the launch of our upcoming National Junior Championship 2026 sponsored by SMARTSPORTZ.IN.
-
-Over the past year, our platform has empowered thousands of young athletes to play, compete, inspire, and succeed across multiple sports disciplines. This tournament brings together top talent from over 50 schools across the region.
-
-We cordially invite your organization to participate as an official partner for this flagship event. Detailed event schedules and sponsorship kits are attached with this notice.</textarea>
+            <div id="m2-body" class="rich-editor" contenteditable="true">We are thrilled to announce the launch of our upcoming National Junior Championship 2026 sponsored by SMARTSPORTZ.IN.<br><br>Over the past year, our platform has empowered thousands of young athletes to play, compete, inspire, and succeed across multiple sports disciplines. This tournament brings together top talent from over 50 schools across the region.<br><br>We cordially invite your organization to participate as an official partner for this flagship event. Detailed event schedules and sponsorship kits are attached with this notice.</div>
+          </label>
+          <label>Last Text
+            <textarea id="m2-closing" rows="3">Yours faithfully,
+XXX</textarea>
           </label>
         </div>
 
@@ -97,12 +106,14 @@ We cordially invite your organization to participate as an official partner for 
                 <div class="meta-row"><span id="p-m1-to"></span></div>
                 <div class="meta-row subject"><span id="p-m1-subject"></span></div>
                 <div id="p-m1-body" class="body-text"></div>
+                <div id="p-m1-closing" class="closing-text"></div>
               </div>
 
               <div id="preview-method2" class="preview-method hidden">
                 <h2 id="p-m2-title"></h2>
                 <p id="p-m2-dear" class="dear"></p>
                 <div id="p-m2-body" class="body-text"></div>
+                <div id="p-m2-closing" class="closing-text"></div>
               </div>
             </div>
           </div>

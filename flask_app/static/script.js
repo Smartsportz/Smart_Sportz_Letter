@@ -15,8 +15,11 @@ const els = {
   moveDown: document.getElementById('move-down'),
   addPage: document.getElementById('add-page'),
   removePage: document.getElementById('remove-page'),
-  stack: document.getElementById('preview-stack')
+  stack: document.getElementById('preview-stack'),
+  formatButtons: document.querySelectorAll('.format-btn')
 };
+
+let activeEditor = document.getElementById('m1-body');
 
 function cleanParagraphs(text) {
   return (text || '')
@@ -27,18 +30,27 @@ function cleanParagraphs(text) {
     .join('\n\n');
 }
 
+function normalizeEditorHtml(editor) {
+  return editor.innerHTML
+    .replace(/<div><br><\/div>/gi, '<br>')
+    .replace(/<p><br><\/p>/gi, '<br>')
+    .trim();
+}
+
 function renderMethod1() {
   document.getElementById('p-m1-title').textContent = document.getElementById('m1-title').value.trim();
   document.getElementById('p-m1-from').textContent = document.getElementById('m1-from').value.trim();
   document.getElementById('p-m1-to').textContent = document.getElementById('m1-to').value.trim();
   document.getElementById('p-m1-subject').textContent = document.getElementById('m1-subject').value.trim();
-  document.getElementById('p-m1-body').textContent = cleanParagraphs(document.getElementById('m1-body').value);
+  document.getElementById('p-m1-body').innerHTML = normalizeEditorHtml(document.getElementById('m1-body'));
+  document.getElementById('p-m1-closing').textContent = document.getElementById('m1-closing').value.trim();
 }
 
 function renderMethod2() {
   document.getElementById('p-m2-title').textContent = document.getElementById('m2-title').value.trim();
   document.getElementById('p-m2-dear').textContent = `Dear ${document.getElementById('m2-dear').value.trim()},`;
-  document.getElementById('p-m2-body').textContent = cleanParagraphs(document.getElementById('m2-body').value);
+  document.getElementById('p-m2-body').innerHTML = normalizeEditorHtml(document.getElementById('m2-body'));
+  document.getElementById('p-m2-closing').textContent = document.getElementById('m2-closing').value.trim();
 }
 
 function updatePreview() {
@@ -62,12 +74,44 @@ function setMethod(method) {
   els.preview2.classList.toggle('hidden', method !== 'method2');
 }
 
+function refreshToolbarState() {
+  els.formatButtons.forEach(button => {
+    const command = button.dataset.command;
+    let active = false;
+    try {
+      active = document.queryCommandState(command);
+    } catch {
+      active = false;
+    }
+    button.classList.toggle('active', active);
+  });
+}
+
 els.methodTabs.forEach(btn => {
   btn.addEventListener('click', () => setMethod(btn.dataset.method));
 });
 
-document.querySelectorAll('input, textarea').forEach(field => {
+document.querySelectorAll('input, textarea, .rich-editor').forEach(field => {
   field.addEventListener('input', updatePreview);
+});
+
+document.querySelectorAll('.rich-editor').forEach(editor => {
+  editor.addEventListener('focus', () => {
+    activeEditor = editor;
+    refreshToolbarState();
+  });
+  editor.addEventListener('keyup', refreshToolbarState);
+  editor.addEventListener('mouseup', refreshToolbarState);
+});
+
+els.formatButtons.forEach(button => {
+  button.addEventListener('mousedown', event => event.preventDefault());
+  button.addEventListener('click', () => {
+    activeEditor.focus();
+    document.execCommand(button.dataset.command, false, null);
+    updatePreview();
+    refreshToolbarState();
+  });
 });
 
 async function downloadPdf() {
@@ -82,13 +126,15 @@ async function downloadPdf() {
         from: document.getElementById('m1-from').value,
         to: document.getElementById('m1-to').value,
         subject: document.getElementById('m1-subject').value,
-        body: document.getElementById('m1-body').value
+        bodyHtml: normalizeEditorHtml(document.getElementById('m1-body')),
+        closing: document.getElementById('m1-closing').value
       }
     : {
         method: 'method2',
         title,
         dear: document.getElementById('m2-dear').value,
-        body: document.getElementById('m2-body').value
+        bodyHtml: normalizeEditorHtml(document.getElementById('m2-body')),
+        closing: document.getElementById('m2-closing').value
       };
 
   payload.offset = state.offset;
