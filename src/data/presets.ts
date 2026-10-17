@@ -48,7 +48,7 @@ Enclosed is the comprehensive sponsorship proposal detailing tier benefits and e
       dear: 'Dear Valued Sports Partner,',
       body: `We are excited to share a major milestone in our journey. SMARTSPORTZ.IN has officially expanded its sports infrastructure platform to cover regional tournaments in football, tennis, chess, and track & field events across South India.
 
-Guided by our core motto — "PLAY · COMPETE · INSPIRE · SUCCEED" — our mission remains centered on empowering young talent with world-class facilities and transparent tournament tracking.
+Guided by our core motto — "PLAY · COMPETE · CONNECT · GROW" — our mission remains centered on empowering young talent with world-class facilities and transparent tournament tracking.
 
 We express our sincere gratitude for your continued support and collaboration. Stay tuned for upcoming event registrations and partnership programs through our portal www.smartsportz.in.`
     }

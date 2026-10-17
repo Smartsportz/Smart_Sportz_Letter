@@ -5,7 +5,7 @@ export const DEFAULT_TEMPLATES: LetterheadConfig[] = [
     id: 'smartsportz_default',
     name: 'SMARTSPORTZ.IN (Original Letterhead)',
     companyName: 'SMARTSPORTZ.IN',
-    tagline: 'PLAY · COMPETE · INSPIRE · SUCCEED',
+    tagline: 'PLAY · COMPETE · CONNECT · GROW',
     website: 'www.smartsportz.in',
     email: 'info@smartsportz.in',
     phone: '+91 98765 43210',
