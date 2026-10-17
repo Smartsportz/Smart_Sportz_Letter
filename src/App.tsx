@@ -49,7 +49,7 @@ Please sign and return the duplicate copy of this letter as a token of your acce
       dear: 'Dear Valued Sports Partner,',
       body: `We are thrilled to announce the launch of our upcoming National Junior Championship 2026 sponsored by SMARTSPORTZ.IN.
 
-Over the past year, our platform has empowered thousands of young athletes to play, compete, inspire, and succeed across multiple sports disciplines. This tournament brings together top talent from over 50 schools across the region.
+Over the past year, our platform has empowered thousands of young athletes to play, compete, connect, and grow across multiple sports disciplines. This tournament brings together top talent from over 50 schools across the region.
 
 We cordially invite your organization to participate as an official partner for this flagship event. Detailed event schedules and sponsorship kits are attached with this notice.`,
     },
